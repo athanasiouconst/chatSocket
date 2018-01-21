@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+
+
+
+<!--<h:inputTextarea id="messagesTexArea" rows="10" cols="45"> </h:inputTextarea>-->
+<!--<h:inputTextarea id="usersTexArea" rows="10" cols="45"> </h:inputTextarea>-->
+<!--<h:inputText id="textMessage" size="60"/>-->
+
+<textarea id="messagesTexArea" rows="10" cols="45"> </textarea>
+<textarea id="usersTexArea" rows="10" cols="45"> </textarea>
+<input id="textMessage" type="text" size="60"/>
+
+
+<h:commandButton onclick="sendMessage();" value="Send" id="textMessageSubmit" />
+
+<script type="text/javascript">
+
+    var webSocket = new WebSocket("ws://localhost:8080/chatSocket/endPointServer");
+
+    var messages = document.getElementById("messagesTexArea");
+
+    webSocket.onmessage = function processMessage(message) {
+        var jsonData = JSON.parse(message.data);
+
+        if (jsonData.message != null) messages.value += jsonData.message + "\n";
+
+        if (jsonData.users != null) {
+            usersTexArea.value = "";
+            var i = 0;
+            while (jsonData.users.length > i) usersTexArea.value += jsonData.users[i++] + "\n";
+        }
+    };
+
+    function sendMessage() {
+
+        webSocket.send(textMessage.value);
+        textMessage.value = "";
+    }
+    window.onbeforeunload = function () {
+        webSocket.onclose = function () {
+        };
+        webSocket.close();
+    };
+
+</script>
+</html>
